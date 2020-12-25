@@ -6,8 +6,9 @@
 
 module Yesod.Trans.Class.Reader
   ( ReaderSite
+  , runReaderSite
 
-  , MonadSiteReader (..)
+  , SiteReader (..)
   ) where
 
 import Yesod.Site.Class
@@ -18,30 +19,48 @@ import Yesod.Core
   ( RenderRoute (..)
   )
 
-class MonadSiteReader r site where
+-- | The class of sites which can read some data
+class SiteReader r site where
+  {-# MINIMAL (ask | reader), local #-}
+  -- | Get the data value
   ask :: (MonadSite m) => m site r
   ask = reader id
+  -- | Extract a value from the data
   reader :: (MonadSite m) => (r -> a) -> m site a
   reader f = f <$> ask
 
+  -- | Run a computation with a transformed version of the current data
+  -- value
   local :: (MonadSite m) => (r -> r) -> m site a -> m site a
 
 instance {-# OVERLAPPABLE #-}
-  (SiteTrans t, MonadSiteReader r site) => MonadSiteReader r (t site) where
+  (SiteTrans t, SiteReader r site) => SiteReader r (t site) where
   ask = lift ask
   reader f = lift $ reader f
 
   local f = mapSiteT (local f)
 
+-- | A site transformation which extends a site with some additional data
+-- which can be read
 data ReaderSite r site = ReaderSite
   { readVal :: r
   , unReaderSite :: site
   }
 
+-- | Compute the effect of 'ReaderSite' by passing in the data value to be
+-- used when reading
+runReaderSite
+  :: (MonadSite m)
+  => r
+  -> m (ReaderSite r site) a
+  -> m site a
+runReaderSite r
+  = withSiteT (ReaderSite r)
+
 instance Copointed (ReaderSite r) where
   copoint = unReaderSite
 
-instance MonadSiteReader r (ReaderSite r site) where
+instance SiteReader r (ReaderSite r site) where
   ask = do
     ReaderSite r site <- askSite
     pure r

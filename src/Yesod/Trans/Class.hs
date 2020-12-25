@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
@@ -21,15 +20,18 @@ import Yesod.Core
   , Yesod (..)
   )
 
+-- | The class of site transformations
+--
+-- A site transformation is a wrapper around a Yesod foundation site which
+-- augments it with additional functionality.
 class SiteTrans (t :: * -> *) where
+  -- | Lift a Yesod computation to a transformed computation, typically by
+  -- wrapping the foundation site directly
   lift :: (MonadSite m) => m site a -> m (t site) a
 
+  -- | Transform the Yesod computation under a site transformation
   mapSiteT
     :: (MonadSite m, MonadSite n, SiteCompatible site site')
     => (m site a -> n site' b)
     -> m (t site) a -> n (t site') b
 
-coerceHtmlUrl
-  :: SiteCompatible site site'
-  => HtmlUrl (Route site) -> HtmlUrl (Route site')
-coerceHtmlUrl url = url . (. coerce)

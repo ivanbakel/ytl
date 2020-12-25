@@ -8,7 +8,7 @@
 module Yesod.Trans.Class.Writer
   ( WriterSite
 
-  , MonadSiteWriter (..)
+  , SiteWriter (..)
   ) where
 
 import Yesod.Site.Class
@@ -23,24 +23,34 @@ import Yesod.Core
   )
 
 -- TODO: Decide if we want a lazy/strict distinction
-class (Monoid w) => MonadSiteWriter w site where
+
+-- | The class of sites which have some writing output
+class (Monoid w) => SiteWriter w site where
+  {-# MINIMAL (writer | tell), listen, pass #-}
+
+  -- | Write something to the output, returning a wrapped value
   writer :: (MonadSite m) => (a, w) -> m site a
   writer (a, w) = tell w >> pure a
+
+  -- | Write something to the output
   tell :: (MonadSite m) => w -> m site ()
   tell w = writer ((), w)
 
+  -- | Run a computation, returning the resulting contents of the output
   listen :: (MonadSite m) => m site a -> m site (a, w)
 
+  -- | Run a computation which modifies the output
   pass :: MonadSite m => m site (a, w -> w) -> m site a
 
 instance {-# OVERLAPPABLE #-}
-  (SiteTrans t, MonadSiteWriter w site) => MonadSiteWriter w (t site) where
+  (SiteTrans t, SiteWriter w site) => SiteWriter w (t site) where
   writer = lift . writer
   tell = lift . tell
 
   listen = mapSiteT listen
   pass = mapSiteT pass
 
+-- | A site transformation which extends a site with some writing output
 newtype WriterSite w site = WriterSite
   { unWriterSite :: ReaderSite (IORef w) site
     -- "Is an IORef safe in Yesod sites?"
@@ -48,10 +58,22 @@ newtype WriterSite w site = WriterSite
     -- Yes, because the Yesod code uses one to build its web pages.
   }
 
+-- | Compute the effect of a 'WriterSite', getting back the output after having
+-- run the computation
+runWriterSite
+  :: (MonadSite m, Monoid w)
+  => m (WriterSite w site) a
+  -> m site (a, w)
+runWriterSite inner = do
+  wRef <- liftIO (newIORef mempty)
+  a <- runReaderSite wRef $ withSiteT WriterSite $ inner
+  w <- liftIO $ readIORef wRef
+  pure (a, w)
+
 instance Copointed (WriterSite w) where
   copoint = copoint . unWriterSite
 
-instance (Monoid w) => MonadSiteWriter w (WriterSite w site) where
+instance (Monoid w) => SiteWriter w (WriterSite w site) where
   tell v = withSiteT unWriterSite do
     wRef <- ask
     liftIO $ modifyIORef' wRef (<> v)
