@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Yesod.Trans.Class.Reader
-  ( ReaderSite
+  ( ReaderSite (..)
   , runReaderSite
 
   , SiteReader (..)
@@ -62,7 +62,7 @@ instance Copointed (ReaderSite r) where
 
 instance SiteReader r (ReaderSite r site) where
   ask = do
-    ReaderSite r site <- askSite
+    ReaderSite r _ <- askSite
     pure r
 
   local f = withSiteT (\(ReaderSite r site) -> ReaderSite (f r) site)
@@ -77,5 +77,5 @@ instance SiteTrans (ReaderSite r) where
   lift = withSiteT unReaderSite
 
   mapSiteT runner argM = do
-    ReaderSite r site <- askSite
+    ReaderSite r _ <- askSite
     withSiteT unReaderSite $ runner $ withSiteT (ReaderSite r) argM

@@ -6,7 +6,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Yesod.Trans.Class.Writer
-  ( WriterSite
+  ( WriterSite (..)
+  , runWriterSite
 
   , SiteWriter (..)
   ) where
