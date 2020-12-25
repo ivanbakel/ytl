@@ -1,9 +1,11 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Yesod.Trans.Class.Writer
   ( WriterSite (..)
@@ -26,7 +28,7 @@ import Yesod.Core
 -- TODO: Decide if we want a lazy/strict distinction
 
 -- | The class of sites which have some writing output
-class (Monoid w) => SiteWriter w site where
+class (Monoid w) => SiteWriter w site | site -> w where
   {-# MINIMAL (writer | tell), listen, pass #-}
 
   -- | Write something to the output, returning a wrapped value

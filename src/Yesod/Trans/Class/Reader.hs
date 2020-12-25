@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Yesod.Trans.Class.Reader
   ( ReaderSite (..)
@@ -20,7 +22,7 @@ import Yesod.Core
   )
 
 -- | The class of sites which can read some data
-class SiteReader r site where
+class SiteReader r site | site -> r where
   {-# MINIMAL (ask | reader), local #-}
   -- | Get the data value
   ask :: (MonadSite m) => m site r
