@@ -1,7 +1,19 @@
 name:                ytl
 version:             0.1.0.0
--- synopsis:
--- description:
+synopsis:            mtl-style transformations for Yesod sites
+description:         A library of transformers for extending the behaviour of
+                     Yesod sites in an mtl-style API, through transformations
+                     of the foundation site.
+                     .
+                     This package contains:
+                     .
+                      * An API for declaring and using site transformers,
+                        which modify the behaviour of a Yesod site while still
+                        allowing it to be used with existing Yesod code, until
+                        monad transformers
+                     .
+                     * Some useful site transformers and their corresponding
+                       APIs
 homepage:            https://github.com/ivanbakel/ytl#readme
 license:             BSD3
 license-file:        LICENSE
