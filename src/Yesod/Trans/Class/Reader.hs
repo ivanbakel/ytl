@@ -62,7 +62,7 @@ runReaderSite r
 instance Copointed (ReaderSite r) where
   copoint = unReaderSite
 
-instance SiteReader r (ReaderSite r site) where
+instance {-# OVERLAPPING #-} SiteReader r (ReaderSite r site) where
   ask = do
     ReaderSite r _ <- askSite
     pure r

@@ -10,16 +10,6 @@ module Yesod.Trans.Class
 import Yesod.Site.Class
 import Yesod.Site.Util
 
-import Data.Coerce
-import Yesod.Core
-  ( Approot (..)
-  , guessApproot
-  , HtmlUrl
-  , RenderRoute (..)
-  , ScriptLoadPosition (..)
-  , Yesod (..)
-  )
-
 -- | The class of site transformations
 --
 -- A site transformation is a wrapper around a Yesod foundation site which

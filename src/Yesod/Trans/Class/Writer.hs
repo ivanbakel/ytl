@@ -76,7 +76,7 @@ runWriterSite inner = do
 instance Copointed (WriterSite w) where
   copoint = copoint . unWriterSite
 
-instance (Monoid w) => SiteWriter w (WriterSite w site) where
+instance {-# OVERLAPPING #-} (Monoid w) => SiteWriter w (WriterSite w site) where
   tell v = withSiteT unWriterSite do
     wRef <- ask
     liftIO $ modifyIORef' wRef (<> v)

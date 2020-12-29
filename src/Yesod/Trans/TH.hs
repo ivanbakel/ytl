@@ -6,7 +6,6 @@ module Yesod.Trans.TH
   ( defaultYesodInstanceExcept
   ) where
 
-import Yesod.Site.Class
 import Yesod.Site.Util
 import Yesod.Trans.Class
 
@@ -21,7 +20,6 @@ import Yesod.Core
   )
 
 import Language.Haskell.TH
-import Language.Haskell.TH.Quote
 
 coerceHtmlUrl
   :: SiteCompatible site site'
@@ -60,12 +58,12 @@ defaultYesodInstanceExcept
              -- class methods that just delegate to the base class.
   -> Q [Dec]
 defaultYesodInstanceExcept baseSite partialInstanceQ = do
-  [InstanceD overlap ctxt head exceptions] <- partialInstanceQ
+  [InstanceD overlap ctxt instanceHead exceptions] <- partialInstanceQ
   defaultImplementations <- defaultImplementationsQ
 
   let fullBody = exceptions <> (filter (`undeclaredIn` exceptions) defaultImplementations)
 
-  pure [InstanceD overlap ctxt head fullBody]
+  pure [InstanceD overlap ctxt instanceHead fullBody]
   where
     decName :: Dec -> Maybe Name
     decName (FunD name _) = Just name
