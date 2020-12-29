@@ -30,6 +30,11 @@ class SiteTrans (t :: * -> *) where
   lift :: (MonadSite m) => m site a -> m (t site) a
 
   -- | Transform the Yesod computation under a site transformation
+  --
+  -- Unlike transformers and mtl, ytl does not allow transformers which are
+  -- not functors in the category of (Yesod) monads. This is because all such
+  -- transformed monads must still be isomorphic to @ReaderT@ (since that is
+  -- their underlying representation in Yesod).
   mapSiteT
     :: (MonadSite m, MonadSite n, SiteCompatible site site')
     => (m site a -> n site' b)
